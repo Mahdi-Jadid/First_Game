@@ -4,6 +4,7 @@ import com.tutorial.main.graphics.renderable_objects.Renderable;
 import com.tutorial.main.graphics.window.Window;
 
 import java.awt.*;
+import java.awt.image.BufferStrategy;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.stream.Collectors;
@@ -11,8 +12,9 @@ import java.util.stream.Stream;
 
 public final class Graphics_Handler extends Canvas {
 
-    private final LinkedList<Renderable> renderables_list;
+    private static Graphics game_graphics;
 
+    private final LinkedList<Renderable> renderables_list;
     private static Graphics_Handler handler;
 
     public static void init(Renderable... renderables) {
@@ -41,16 +43,16 @@ public final class Graphics_Handler extends Canvas {
             return;
         }
 
-        Graphics graphics = buffer_strategy.getDrawGraphics();
+        game_graphics = buffer_strategy.getDrawGraphics();
 
-        graphics.setColor(Color.BLACK);
-        graphics.fillRect(0, 0, Window.get_width(), Window.get_height());
+        game_graphics.setColor(Color.BLACK);
+        game_graphics.fillRect(0, 0, Window.get_width(), Window.get_height());
 
         if (!renderables_list.isEmpty())
             for (var renderable : renderables_list)
-                renderable.render(graphics);
+                renderable.render();
 
-        graphics.dispose();
+        game_graphics.dispose();
         buffer_strategy.show();
 
     }
@@ -62,9 +64,14 @@ public final class Graphics_Handler extends Canvas {
         return handler;
     }
 
+    public static Graphics get_graphics() {
+        return game_graphics;
+    }
+
     public static void add_renderables(Renderable... renderables) {
         if (handler == null) init();
         Stream.of(renderables).forEach(get_handler().renderables_list::add);
     }
+
 
 }

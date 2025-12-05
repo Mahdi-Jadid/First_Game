@@ -1,6 +1,7 @@
 package com.tutorial.main;
 
 import com.tutorial.main.graphics.Graphics_Handler;
+import com.tutorial.main.graphics.renderable_objects.movable.Game_Character;
 import com.tutorial.main.graphics.window.Window;
 import com.tutorial.main.system_resources.Game_Thread;
 
