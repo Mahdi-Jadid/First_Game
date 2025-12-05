@@ -1,0 +1,15 @@
+package com.tutorial.main.logical_specifiers;
+
+public class Specifiers {
+
+    public static int clamp(int x, int min, int max) {
+        if (x < min) return min;
+        return Math.min(x, max);
+    }
+
+    public static double clamp(double x, double min, double max) {
+        if (x < min) return min;
+        return Math.min(x, max);
+    }
+
+}
