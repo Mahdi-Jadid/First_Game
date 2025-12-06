@@ -1,4 +1,4 @@
-package com.tutorial.main.logical_specifiers;
+package com.tutorial.main.specifiers;
 
 public class Specifiers {
 

@@ -13,15 +13,13 @@ import java.util.stream.Stream;
 public final class Graphics_Handler extends Canvas {
 
     private static Graphics game_graphics;
-
-    private final LinkedList<Renderable> renderables_list;
     private static Graphics_Handler handler;
+    private final LinkedList<Renderable> renderables_list;
 
     public static void init(Renderable... renderables) {
         if (handler == null)
          handler = new Graphics_Handler(renderables);
     }
-
     private Graphics_Handler(Renderable... renderables) {
         renderables_list = Arrays.stream(renderables).collect(Collectors.toCollection(LinkedList::new));
     }
@@ -33,7 +31,6 @@ public final class Graphics_Handler extends Canvas {
                 renderable.update();
 
     }
-
     public void render() {
 
         var buffer_strategy = getBufferStrategy();
@@ -63,14 +60,20 @@ public final class Graphics_Handler extends Canvas {
 
         return handler;
     }
-
     public static Graphics get_graphics() {
         return game_graphics;
     }
 
     public static void add_renderables(Renderable... renderables) {
         if (handler == null) init();
+        if (renderables == null) return;
         Stream.of(renderables).forEach(get_handler().renderables_list::add);
+    }
+    public static void remove_renderable(Renderable renderable) {
+        if (handler == null) init();
+        if (renderable == null) return;
+
+        get_handler().renderables_list.remove(renderable);
     }
 
 

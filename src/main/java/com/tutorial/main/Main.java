@@ -1,7 +1,7 @@
 package com.tutorial.main;
 
 import com.tutorial.main.graphics.Graphics_Handler;
-import com.tutorial.main.graphics.renderable_objects.movable.Game_Character;
+import com.tutorial.main.graphics.renderable_objects.Game_Character;
 import com.tutorial.main.graphics.window.Window;
 import com.tutorial.main.system_resources.Game_Thread;
 
@@ -9,7 +9,9 @@ public class Main {
 
     private void init() {
 
-        Graphics_Handler.init();
+        Graphics_Handler.init(
+                Game_Character.New(500, 375, Game_Character.Player)
+        );
 
         Window.init(
                 Graphics_Handler.get_handler(),
@@ -36,6 +38,7 @@ public class Main {
 
                     var now = System.nanoTime();
                     delta += (now - last_time) / ns_per_update;
+                    last_time = now;
                     while (delta >= 1) {
                         handler.update();
                         delta--;
@@ -64,6 +67,16 @@ public class Main {
         var main = new Main();
         main.init();
         main.start_loop();
+
+        var en1 = Game_Character.New(100, 100, Game_Character.Enemy_Basic);
+        var en2 = Game_Character.New(400, 300, Game_Character.Enemy_Basic);
+
+        en1.set_velocity(3, 5);
+        en2.set_velocity(5, 3);
+
+        Graphics_Handler.add_renderables(en1, en2);
+
+
     }
 
 }
