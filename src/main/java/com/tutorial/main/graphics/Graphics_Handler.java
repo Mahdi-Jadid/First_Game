@@ -1,5 +1,6 @@
 package com.tutorial.main.graphics;
 
+import com.tutorial.main.graphics.input.Input;
 import com.tutorial.main.graphics.renderable_objects.Renderable;
 import com.tutorial.main.graphics.window.Window;
 
@@ -22,6 +23,7 @@ public final class Graphics_Handler extends Canvas {
     }
     private Graphics_Handler(Renderable... renderables) {
         renderables_list = Arrays.stream(renderables).collect(Collectors.toCollection(LinkedList::new));
+        this.addKeyListener(Input.get_key_adapter());
     }
 
     public void update() {
