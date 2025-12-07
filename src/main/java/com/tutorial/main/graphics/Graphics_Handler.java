@@ -20,10 +20,10 @@ public final class Graphics_Handler extends Canvas {
     public static void init(Renderable... renderables) {
         if (handler == null)
          handler = new Graphics_Handler(renderables);
+        Input.add_key_listener();
     }
     private Graphics_Handler(Renderable... renderables) {
         renderables_list = Arrays.stream(renderables).collect(Collectors.toCollection(LinkedList::new));
-        this.addKeyListener(Input.get_key_adapter());
     }
 
     public void update() {

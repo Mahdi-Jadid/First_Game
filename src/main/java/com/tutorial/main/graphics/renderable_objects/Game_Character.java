@@ -8,6 +8,9 @@ import com.tutorial.main.specifiers.Specifiers;
 import java.awt.*;
 import java.util.List;
 
+import static java.awt.event.KeyEvent.*;
+
+
 public class Game_Character implements Renderable {
 
     public static final int SAME = 90_000_000;
@@ -116,16 +119,22 @@ public class Game_Character implements Renderable {
         player.set_color(Color.white);
         player.set_health(5_00);
 
-        Input.add_key_listener(player);
+        Input.set_press_command(VK_W, () -> player.set_velocity(SAME, -5));
+        Input.set_press_command(VK_A, () -> player.set_velocity(-5, SAME));
+        Input.set_press_command(VK_S, () -> player.set_velocity(SAME, 5));
+        Input.set_press_command(VK_D, () -> player.set_velocity(5, SAME));
+
+        Input.set_release_command(VK_W, () -> player.set_velocity(SAME, 0));
+        Input.set_release_command(VK_A, () -> player.set_velocity(0, SAME));
+        Input.set_release_command(VK_S, () -> player.set_velocity(SAME, 0));
+        Input.set_release_command(VK_D, () -> player.set_velocity(0, SAME));
+
+
         player.update_position = () -> {
 
             var x = Specifiers.clamp(player.get_x(), 0, Window.get_width() - player.width - 20);
             var y = Specifiers.clamp(player.get_y(), 0, Window.get_height() - player.height - 42);
 
-            if (x == Window.get_width() - player.width - 20 || x == 0)
-                player.vel_x *= -1;
-            if (y == Window.get_height() - player.height - 42 || y == 0)
-                player.vel_y *= -1;
 
             player.set_position(
                     (float) x + player.vel_x,

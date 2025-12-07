@@ -23,6 +23,7 @@ public class Main {
 
     private void start_loop() {
         var handler = Graphics_Handler.get_handler();
+        handler.requestFocus();
 
         Game_Thread.start(
                 () -> {
@@ -51,7 +52,7 @@ public class Main {
 
                     if (System.currentTimeMillis() - time_ms > 1000) {
                         time_ms += 1000;
-                        IO.println("FPS: " + frames_passed);
+                        //IO.println("FPS: " + frames_passed);
                         frames_passed = 0;
                     }
 
@@ -68,9 +69,10 @@ public class Main {
         main.init();
         main.start_loop();
 
-        var pl = Game_Character.New(500, 375, Game_Character.Player);
-
-        Graphics_Handler.add_renderables(pl);
+        var player = Game_Character.New(500, 375, Game_Character.Player);
+        var enemy_basic = Game_Character.New(100, 100, Game_Character.Enemy_Basic);
+        enemy_basic.set_velocity(2, -2);
+        Graphics_Handler.add_renderables(player, enemy_basic);
     }
 
 }

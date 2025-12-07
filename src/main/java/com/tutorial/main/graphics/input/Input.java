@@ -1,64 +1,59 @@
 package com.tutorial.main.graphics.input;
 
 import com.tutorial.main.graphics.Graphics_Handler;
-import com.tutorial.main.graphics.renderable_objects.Game_Character;
-import com.tutorial.main.graphics.renderable_objects.Renderable;
 
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
-
-import static java.awt.event.KeyEvent.*;
+import java.util.Map;
 
 public class Input {
 
-    private static KeyAdapter key_adapter;
+    private static final List<Integer> press_command_keys = new LinkedList<>();
+    private static final List<Integer> release_command_keys = new LinkedList<>();
+
+    private static final Map<Integer, Runnable> press_commands = new HashMap<>();
+    private static final Map<Integer, Runnable> release_commands = new HashMap<>();
+
 
     private Input() {}
 
-    public static void add_key_listener(Game_Character character) {
+    public static void add_key_listener() {
 
-        var key_adapter = new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent e) {
+      var key_adapter = new KeyAdapter() {
+          @Override
+          public void keyPressed(KeyEvent e) {
+              var key_code = e.getKeyCode();
+              if (press_command_keys.contains(key_code)) {
+                  press_commands.get(key_code).run();
+              }
+          }
 
-               var key =  e.getKeyCode();
+          @Override
+          public void keyReleased(KeyEvent e) {
+              var key_code = e.getKeyCode();
+              if(release_command_keys.contains(key_code))
+                      release_commands.get(key_code).run();
+          }
+      };
 
-                  if (character.get_id() == Game_Character.Player)
-                      switch(key) {
-                          case VK_W -> character.set_velocity(0, -5);
-                          case VK_A -> character.set_velocity(-5, 0);
-                          case VK_S -> character.set_velocity(0, 5);
-                          case VK_D -> character.set_velocity(5, 0);
-                      }
-
-
-            }
-
-            @Override
-            public void keyReleased(KeyEvent e) {
-
-                var key =  e.getKeyCode();
-
-                if (character.get_id() == Game_Character.Player)
-                    switch(key) {
-                        case VK_W, VK_D, VK_S, VK_A -> character.set_velocity(0, 0);
-                    }
-
-            }
-        };
-
-        set_key_adapter(key_adapter);
-
+      Graphics_Handler.get_handler().addKeyListener(key_adapter);
     }
 
-    private static void set_key_adapter(KeyAdapter ka) {
-        key_adapter = ka;
+    public static void set_press_command(int key, Runnable run) {
+        if (!press_command_keys.contains(key)) {
+            press_command_keys.add(key);
+            press_commands.put(key, run);
+        }
     }
 
-    public static KeyAdapter get_key_adapter() {
-        return key_adapter;
+    public static void set_release_command(int key, Runnable run) {
+        if (!release_command_keys.contains(key)) {
+            release_command_keys.add(key);
+            release_commands.put(key, run);
+        }
     }
-
 
 }
