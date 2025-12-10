@@ -13,7 +13,7 @@ import static java.awt.event.KeyEvent.*;
 
 public class Game_Character implements Renderable {
 
-    public static final int SAME = 90_000_000;
+    public static final int SAME = 900_000_000;
 
     // ============== BASE FIELDS ============== //
 
@@ -31,6 +31,7 @@ public class Game_Character implements Renderable {
     private interface Character_Identity { void implement(Game_Character character); }
     private Runnable render_implementation;
     private Runnable update_position,update_health, update_trail;
+    private Rectangle bounds;
 
     private Game_Character(float init_x, float init_y, Character_Identity character_id) {
         x = init_x;
@@ -38,6 +39,7 @@ public class Game_Character implements Renderable {
         id = character_id;
         if (id == null) throw new RuntimeException("No Identity Specified");
         id.implement(this);
+        bounds = new Rectangle((int)x, (int)y, width, height);
     }
 
     public static Game_Character New(float x, float y, Character_Identity id) {
@@ -49,7 +51,6 @@ public class Game_Character implements Renderable {
     @Override
     public void update() {
         for (var update : List.of(update_position, update_health, update_trail))
-            if (update != null)
                update.run();
     }
     @Override
@@ -71,7 +72,7 @@ public class Game_Character implements Renderable {
         if (dy != SAME)
             vel_y = dy;
     }
-    private void set_position(float x, float y) {
+    public void set_position(float x, float y) {
         if (x != SAME)
             this.x = x;
         if (y != SAME)
@@ -102,12 +103,16 @@ public class Game_Character implements Renderable {
         return color;
     }
 
-    private void set_health(float health) {
+    public void set_health(float health) {
         this.health = health;
     }
 
     public float get_health() {
         return health;
+    }
+
+    public Rectangle get_bounds() {
+        return bounds;
     }
 
 
@@ -117,7 +122,7 @@ public class Game_Character implements Renderable {
 
         player.set_dimensions(32, 32);
         player.set_color(Color.white);
-        player.set_health(5_00);
+        player.set_health(100);
 
         Input.set_press_command(VK_W, () -> player.set_velocity(SAME, -5));
         Input.set_press_command(VK_A, () -> player.set_velocity(-5, SAME));
@@ -141,10 +146,13 @@ public class Game_Character implements Renderable {
                     (float) y + player.vel_y
             );
 
+            player.bounds.setLocation((int)x, (int)y);
+
         };
         player.update_health = () -> {
 
         };
+
         player.update_trail = () -> {};
 
         player.render_implementation = () -> {
@@ -154,10 +162,30 @@ public class Game_Character implements Renderable {
         };
 
     };
+    public static final Character_Identity Player_HUD = (HUD) -> {
+
+        HUD.set_dimensions(200, 32);
+        HUD.set_color(Color.gray);
+        HUD.set_position(15, 15);
+
+        HUD.update_position = () -> {};
+        HUD.update_health = () -> {};
+        HUD.update_trail = () -> {};
+
+        HUD.render_implementation = () -> {
+            var graphics = Graphics_Handler.get_graphics();
+
+            graphics.setColor(HUD.get_color());
+            graphics.fillRect((int) HUD.get_x(), (int) HUD.get_y(), HUD.get_width(), HUD.get_height());
+        };
+
+    };
+
     public static final Character_Identity Enemy_Basic = (enemy_basic) -> {
 
         enemy_basic.set_dimensions(16, 16);
         enemy_basic.set_color(Color.red);
+        enemy_basic.set_velocity(5, -5);
 
         enemy_basic.update_position = () -> {
             enemy_basic.set_position(
@@ -180,6 +208,8 @@ public class Game_Character implements Renderable {
             else if (enemy_basic.y < 0) {
                 enemy_basic.vel_y *= -1;
             }
+
+            enemy_basic.bounds.setLocation((int)enemy_basic.get_x(), (int)enemy_basic.get_y());
         };
         enemy_basic.update_health = () -> {};
         enemy_basic.update_trail = () -> {};

@@ -3,21 +3,33 @@ package com.tutorial.main;
 import com.tutorial.main.graphics.Graphics_Handler;
 import com.tutorial.main.graphics.input.Input;
 import com.tutorial.main.graphics.renderable_objects.Game_Character;
+import com.tutorial.main.graphics.renderable_objects.Renderable;
 import com.tutorial.main.graphics.window.Window;
 import com.tutorial.main.system_resources.Game_Thread;
+
+import java.awt.*;
+import java.awt.event.KeyEvent;
 
 public class Main {
 
     private void init() {
-
-        Graphics_Handler.init();
-
         Window.init(
                 Graphics_Handler.get_handler(),
                 Window.EXIT_ON_CLOSE,
                 Window.LOCATION_CENTER,
                 Window.VISIBLE
         );
+
+        Input.set_press_command(KeyEvent.VK_ESCAPE, () -> System.exit(0));
+
+        var player = Game_Character.New(500, 375, Game_Character.Player);
+        player.set_position(
+                Window.get_width()/2 - player.get_width(),
+                Window.get_height()/2 - player.get_height())
+        ;
+        var hud = Game_Character.New(15, 15, Game_Character.Player_HUD);
+        var enemy_basic = Game_Character.New(100, 100, Game_Character.Enemy_Basic);
+        Graphics_Handler.add_renderables(player, hud, enemy_basic);
 
     }
 
@@ -68,11 +80,6 @@ public class Main {
         var main = new Main();
         main.init();
         main.start_loop();
-
-        var player = Game_Character.New(500, 375, Game_Character.Player);
-        var enemy_basic = Game_Character.New(100, 100, Game_Character.Enemy_Basic);
-        enemy_basic.set_velocity(2, -2);
-        Graphics_Handler.add_renderables(player, enemy_basic);
     }
 
 }

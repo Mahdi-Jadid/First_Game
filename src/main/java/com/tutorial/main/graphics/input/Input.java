@@ -17,7 +17,6 @@ public class Input {
     private static final Map<Integer, Runnable> press_commands = new HashMap<>();
     private static final Map<Integer, Runnable> release_commands = new HashMap<>();
 
-
     private Input() {}
 
     public static void add_key_listener() {
@@ -26,16 +25,16 @@ public class Input {
           @Override
           public void keyPressed(KeyEvent e) {
               var key_code = e.getKeyCode();
-              if (press_command_keys.contains(key_code)) {
+
+              if (press_command_keys.contains(key_code))
                   press_commands.get(key_code).run();
-              }
           }
 
           @Override
           public void keyReleased(KeyEvent e) {
               var key_code = e.getKeyCode();
               if(release_command_keys.contains(key_code))
-                      release_commands.get(key_code).run();
+                  release_commands.get(key_code).run();
           }
       };
 
