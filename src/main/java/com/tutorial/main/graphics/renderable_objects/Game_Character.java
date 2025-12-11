@@ -7,6 +7,7 @@ import com.tutorial.main.specifiers.Specifiers;
 
 import java.awt.*;
 import java.util.List;
+import java.util.function.Predicate;
 
 import static java.awt.event.KeyEvent.*;
 
@@ -72,7 +73,7 @@ public class Game_Character implements Renderable {
         if (dy != SAME)
             vel_y = dy;
     }
-    public void set_position(float x, float y) {
+    private void set_position(float x, float y) {
         if (x != SAME)
             this.x = x;
         if (y != SAME)
@@ -96,14 +97,14 @@ public class Game_Character implements Renderable {
         return height;
     }
 
-    public void set_color(Color color) {
+    private void set_color(Color color) {
         this.color = color;
     }
     public Color get_color() {
         return color;
     }
 
-    public void set_health(float health) {
+    private void set_health(float health) {
         this.health = health;
     }
 
@@ -123,6 +124,13 @@ public class Game_Character implements Renderable {
         player.set_dimensions(32, 32);
         player.set_color(Color.white);
         player.set_health(100);
+
+        player.set_position(
+                Window.get_width()/2 - player.get_width(),
+                Window.get_height()/2 - player.get_height()
+        );
+
+        final float player_health_initial = player.get_health();
 
         Input.set_press_command(VK_W, () -> player.set_velocity(SAME, -5));
         Input.set_press_command(VK_A, () -> player.set_velocity(-5, SAME));
@@ -151,6 +159,26 @@ public class Game_Character implements Renderable {
         };
         player.update_health = () -> {
 
+            var renderables = Graphics_Handler.get_handler().get_renderables();
+
+            player.set_health(
+                    (float) Specifiers.clamp(
+                           player.get_health(),
+                           0,
+                           player_health_initial
+                   )
+            );
+
+            var characters = renderables.stream()
+                    .filter(Game_Character.class::isInstance)
+                    .map(Game_Character.class::cast).toList();
+
+            for (var character : characters) {
+                if (character.get_id() == Game_Character.Enemy_Basic)
+                    if (player.get_bounds().intersects(character.get_bounds()))
+                        player.set_health(player.get_health() - 2);
+            }
+
         };
 
         player.update_trail = () -> {};
@@ -162,25 +190,6 @@ public class Game_Character implements Renderable {
         };
 
     };
-    public static final Character_Identity Player_HUD = (HUD) -> {
-
-        HUD.set_dimensions(200, 32);
-        HUD.set_color(Color.gray);
-        HUD.set_position(15, 15);
-
-        HUD.update_position = () -> {};
-        HUD.update_health = () -> {};
-        HUD.update_trail = () -> {};
-
-        HUD.render_implementation = () -> {
-            var graphics = Graphics_Handler.get_graphics();
-
-            graphics.setColor(HUD.get_color());
-            graphics.fillRect((int) HUD.get_x(), (int) HUD.get_y(), HUD.get_width(), HUD.get_height());
-        };
-
-    };
-
     public static final Character_Identity Enemy_Basic = (enemy_basic) -> {
 
         enemy_basic.set_dimensions(16, 16);

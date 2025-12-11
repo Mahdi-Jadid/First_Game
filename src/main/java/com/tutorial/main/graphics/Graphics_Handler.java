@@ -78,5 +78,9 @@ public final class Graphics_Handler extends Canvas {
         get_handler().renderables_list.remove(renderable);
     }
 
+    public LinkedList<Renderable> get_renderables() {
+        return renderables_list;
+    }
+
 
 }

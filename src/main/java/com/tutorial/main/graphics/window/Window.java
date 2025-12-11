@@ -7,13 +7,15 @@ import javax.swing.*;
 public class Window {
 
     private static JFrame base_frame;
-
     private static final int WIDTH = 1000;
     private static final int HEIGHT = 750;
     private static final String TITLE = "Let's Build A Game!";
 
     private static int CUSTOM_WIDTH = 0, CUSTOM_HEIGHT = 0;
     private static String CUSTOM_TITLE = " ";
+
+    private static Window window;
+
 
     public static final Window_Configuration EXIT_ON_CLOSE =
             () -> base_frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -27,8 +29,6 @@ public class Window {
     public static final Window_Configuration VISIBLE =
             () -> base_frame.setVisible(true);
 
-    private static Window window;
-
     private Window(int width, int height, String title, Graphics_Handler handler) {
         var frame = new JFrame(title);
         frame.setSize(width, height);
@@ -40,11 +40,11 @@ public class Window {
 
 
    public static void init (Graphics_Handler handler, Window_Configuration... window_settings)  {
-        if (window == null) {
-            window = new Window(WIDTH, HEIGHT, TITLE, handler);
-            for (var setting : window_settings)
+        if (window != null) return;
+
+        window = new Window(WIDTH, HEIGHT, TITLE, handler);
+        for (var setting : window_settings)
                 setting.configure();
-        }
     }
 
     public static void init (int width, int height, Graphics_Handler handler, Window_Configuration... window_settings) {
@@ -96,5 +96,7 @@ public class Window {
         else
             return TITLE;
     }
+
+
 
 }
