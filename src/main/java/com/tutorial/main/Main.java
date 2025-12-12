@@ -4,6 +4,7 @@ import com.tutorial.main.graphics.Graphics_Handler;
 import com.tutorial.main.graphics.input.Input;
 import com.tutorial.main.graphics.renderable_objects.Game_Character;
 import com.tutorial.main.graphics.renderable_objects.Game_Object;
+import com.tutorial.main.graphics.renderable_objects.Level_Manager;
 import com.tutorial.main.graphics.renderable_objects.Renderable;
 import com.tutorial.main.graphics.window.Window;
 import com.tutorial.main.system_resources.Game_Thread;
@@ -24,12 +25,15 @@ public class Main {
         Input.set_press_command(KeyEvent.VK_ESCAPE, () -> System.exit(0));
 
         var player = Game_Character.New(500, 375, Game_Character.Player);
-        var hud = Game_Object.New(player, Game_Object.Player_HUD);
+
         Graphics_Handler.add_renderables(player);
 
-        for (int i = 0; i < 5; i++)
-            Graphics_Handler.add_renderables(Game_Character.New(i*50, i*37, Game_Character.Enemy_Basic));
+// Could be a good idea for a boss/bonus level
+//        for (int i = 0; i < 10; i++)
+//            Graphics_Handler.add_renderables(Game_Character.New(i*50, i*37, Game_Character.Enemy_Basic));
 
+        Level_Manager.spawn();
+        var hud = Game_Object.New(player, Game_Object.Player_HUD);
         Graphics_Handler.add_renderables(hud);
 
     }

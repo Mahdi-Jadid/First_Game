@@ -1,6 +1,7 @@
 package com.tutorial.main.graphics;
 
 import com.tutorial.main.graphics.input.Input;
+import com.tutorial.main.graphics.renderable_objects.Level_Manager;
 import com.tutorial.main.graphics.renderable_objects.Renderable;
 import com.tutorial.main.graphics.window.Window;
 
@@ -27,6 +28,10 @@ public final class Graphics_Handler extends Canvas {
     }
 
     public void update() {
+
+        Level_Manager.increment_score(1);
+        if (Level_Manager.get_score() == 250)
+            Level_Manager.increment_level();
 
         if (!renderables_list.isEmpty())
             for (var renderable : renderables_list)

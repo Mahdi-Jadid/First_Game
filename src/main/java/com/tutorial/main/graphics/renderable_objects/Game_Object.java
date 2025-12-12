@@ -1,8 +1,11 @@
 package com.tutorial.main.graphics.renderable_objects;
 
 import com.tutorial.main.graphics.Graphics_Handler;
+import com.tutorial.main.graphics.window.Window;
+import com.tutorial.main.specifiers.Specifiers;
 
 import java.awt.*;
+import java.util.Random;
 
 public class Game_Object<T> implements Renderable{
 
@@ -11,6 +14,7 @@ public class Game_Object<T> implements Renderable{
     private int width, height;
     private float x, y;
     private Color color;
+    private Object_Identity<T> id;
 
     // ============== Identity Dependent Methods ============== //
 
@@ -18,6 +22,7 @@ public class Game_Object<T> implements Renderable{
     private interface Object_Identity<T> { void implement(Game_Object object, T subject);}
     private Runnable render_implementation, update_implementation;
     private Game_Object(T subject, Object_Identity<T> identity) {
+        id = identity;
         identity.implement(this, subject);
     }
 
@@ -53,6 +58,10 @@ public class Game_Object<T> implements Renderable{
     }
     private void set_color(Color color) {
         this.color = color;
+    }
+
+    public Object_Identity<T> get_id() {
+        return id;
     }
 
     public int get_width() { return width; }
@@ -97,9 +106,8 @@ public class Game_Object<T> implements Renderable{
             graphics.setColor(Color.WHITE);
             graphics.drawRect((int) hud.get_x(), (int) hud.get_y(), hud.get_width(), hud.get_height());
 
-
-
-
+            graphics.drawString("Level : " + Level_Manager.get_level(), (int) hud.get_x(), (int) hud.get_y() + 64);
+            graphics.drawString("Score : " + Level_Manager.get_score(), (int) hud.get_x(), (int) hud.get_y() + 80);
         };
     };
 

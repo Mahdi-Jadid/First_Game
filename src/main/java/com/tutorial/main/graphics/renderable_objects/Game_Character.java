@@ -7,7 +7,6 @@ import com.tutorial.main.specifiers.Specifiers;
 
 import java.awt.*;
 import java.util.List;
-import java.util.function.Predicate;
 
 import static java.awt.event.KeyEvent.*;
 
@@ -24,7 +23,10 @@ public class Game_Character implements Renderable {
     private float x, y;
     private float vel_x, vel_y;
     private float health;
-    private float trail_alpha;
+    private float trail_lifetime;
+
+
+
 
     // ============== Identity Dependent Methods ============== //
 
@@ -132,18 +134,34 @@ public class Game_Character implements Renderable {
 
         final float player_health_initial = player.get_health();
 
-        Input.set_press_command(VK_W, () -> player.set_velocity(SAME, -5));
-        Input.set_press_command(VK_A, () -> player.set_velocity(-5, SAME));
-        Input.set_press_command(VK_S, () -> player.set_velocity(SAME, 5));
-        Input.set_press_command(VK_D, () -> player.set_velocity(5, SAME));
+        final boolean[] key_down = new boolean[4];
+        Input.set_press_command(VK_W, () -> {
+            player.set_velocity(SAME, -5);
+            key_down[0] = true;
+        });
+        Input.set_press_command(VK_A, () -> {
+            player.set_velocity(-5, SAME);
+            key_down[1] = true;
+        });
+        Input.set_press_command(VK_S, () -> {
+            player.set_velocity(SAME, 5);
+            key_down[2] = true;
+        });
+        Input.set_press_command(VK_D, () -> {
+            player.set_velocity(5, SAME);
+            key_down[3] = true;
+        });
 
-        Input.set_release_command(VK_W, () -> player.set_velocity(SAME, 0));
-        Input.set_release_command(VK_A, () -> player.set_velocity(0, SAME));
-        Input.set_release_command(VK_S, () -> player.set_velocity(SAME, 0));
-        Input.set_release_command(VK_D, () -> player.set_velocity(0, SAME));
+        Input.set_release_command(VK_W, () -> key_down[0] = false);
+        Input.set_release_command(VK_A, () -> key_down[1] = false);
+        Input.set_release_command(VK_S, () -> key_down[2] = false);
+        Input.set_release_command(VK_D, () -> key_down[3] = false);
 
 
         player.update_position = () -> {
+
+            if (!key_down[0] && !key_down[2]) player.set_velocity(SAME,0);
+            if(!key_down[1] && !key_down[3]) player.set_velocity(0, SAME);
 
             var x = Specifiers.clamp(player.get_x(), 0, Window.get_width() - player.width - 20);
             var y = Specifiers.clamp(player.get_y(), 0, Window.get_height() - player.height - 42);
@@ -174,14 +192,16 @@ public class Game_Character implements Renderable {
                     .map(Game_Character.class::cast).toList();
 
             for (var character : characters) {
-                if (character.get_id() == Game_Character.Enemy_Basic)
+                if (character.get_id() == Game_Character.Enemy_Basic || character.get_id() == Game_Character.Enemy_Fast)
                     if (player.get_bounds().intersects(character.get_bounds()))
                         player.set_health(player.get_health() - 2);
             }
 
         };
 
-        player.update_trail = () -> {};
+        player.update_trail = () -> {
+
+        };
 
         player.render_implementation = () -> {
             var graphics = Graphics_Handler.get_graphics();
@@ -190,6 +210,7 @@ public class Game_Character implements Renderable {
         };
 
     };
+
     public static final Character_Identity Enemy_Basic = (enemy_basic) -> {
 
         enemy_basic.set_dimensions(16, 16);
@@ -230,6 +251,46 @@ public class Game_Character implements Renderable {
         };
 
      };
+    public static final Character_Identity Enemy_Fast = (enemy_fast) -> {
+
+        enemy_fast.set_dimensions(16, 16);
+        enemy_fast.set_color(Color.cyan);
+        enemy_fast.set_velocity(2, -9);
+
+        enemy_fast.update_position = () -> {
+            enemy_fast.set_position(
+                    enemy_fast.get_x() + enemy_fast.vel_x,
+                    enemy_fast.get_y() + enemy_fast.vel_y
+            );
+            if (enemy_fast.x > Window.get_width() - enemy_fast.width){
+                enemy_fast.x = Window.get_width() - enemy_fast.width;
+                enemy_fast.vel_x *= -1;
+            }
+            else if (enemy_fast.x < 0) {
+                enemy_fast.x = 0;
+                enemy_fast.vel_x *= -1;
+            }
+
+            if (enemy_fast.y > Window.get_height() - enemy_fast.height) {
+                enemy_fast.y = Window.get_height() - enemy_fast.height;
+                enemy_fast.vel_y *= -1;
+            }
+            else if (enemy_fast.y < 0) {
+                enemy_fast.vel_y *= -1;
+            }
+
+            enemy_fast.bounds.setLocation((int) enemy_fast.get_x(), (int) enemy_fast.get_y());
+        };
+        enemy_fast.update_health = () -> {};
+        enemy_fast.update_trail = () -> {};
+
+        enemy_fast.render_implementation = () -> {
+            var graphics = Graphics_Handler.get_graphics();
+            graphics.setColor(enemy_fast.get_color());
+            graphics.fillRect((int) enemy_fast.get_x(), (int) enemy_fast.get_y(), enemy_fast.get_width(), enemy_fast.get_height());
+        };
+
+    };
 
 
 
