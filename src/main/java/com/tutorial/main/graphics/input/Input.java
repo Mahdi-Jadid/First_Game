@@ -4,15 +4,12 @@ import com.tutorial.main.graphics.Graphics_Handler;
 
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Input {
 
-    private static final List<Integer> press_command_keys = new LinkedList<>();
-    private static final List<Integer> release_command_keys = new LinkedList<>();
+    private static final List<Integer> press_command_keys = new ArrayList<>();
+    private static final List<Integer> release_command_keys = new ArrayList<>();
 
     private static final Map<Integer, Runnable> press_commands = new HashMap<>();
     private static final Map<Integer, Runnable> release_commands = new HashMap<>();

@@ -6,28 +6,27 @@ import com.tutorial.main.graphics.system_managers.Level_Manager;
 import com.tutorial.main.graphics.window.Window;
 
 import java.awt.*;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Stream;
 
 public final class Graphics_Handler extends Canvas {
 
     private static Graphics game_graphics;
     private static Graphics_Handler handler;
-    private final LinkedList<Renderable> renderables_list;
-    private final LinkedList<Renderable> pending_addition;
-    private final LinkedList<Renderable> pending_removal;
+    private final List<Renderable> renderables_list;
+    private final List<Renderable> pending_addition;
+    private final List<Renderable> pending_removal;
 
-    public static void init(Renderable... renderables) {
+    public static void init() {
         if (handler == null)
-         handler = new Graphics_Handler(renderables);
+         handler = new Graphics_Handler();
         Input.add_key_listener();
     }
-    private Graphics_Handler(Renderable... renderables) {
-        renderables_list = Arrays.stream(renderables).collect(Collectors.toCollection(LinkedList::new));
-        pending_addition = new LinkedList<>();
-        pending_removal = new LinkedList<>();
+    private Graphics_Handler() {
+        renderables_list = new ArrayList<>();
+        pending_addition = new ArrayList<>();
+        pending_removal = new ArrayList<>();
     }
 
     public void update() {
@@ -76,9 +75,7 @@ public final class Graphics_Handler extends Canvas {
 
         return handler;
     }
-    public static Graphics get_graphics() {
-        return game_graphics;
-    }
+    public static Graphics get_graphics() { return game_graphics; }
 
     public static void add_renderables(Renderable... renderables) {
         if (handler == null) init();
@@ -91,7 +88,5 @@ public final class Graphics_Handler extends Canvas {
         get_handler().pending_removal.add(renderable);
     }
 
-    public LinkedList<Renderable> get_renderables() {
-        return renderables_list;
-    }
+    public List<Renderable> get_renderables() { return renderables_list; }
 }

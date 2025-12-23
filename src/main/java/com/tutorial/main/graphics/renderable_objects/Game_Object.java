@@ -17,7 +17,7 @@ public class Game_Object<T> implements Renderable{
     // ============== Identity Dependent Methods ============== //
 
     @FunctionalInterface
-    private interface Object_Identity<T> { void implement(Game_Object<T> object, T subject);}
+    private interface Object_Identity<T> { void implement(Game_Object<T> object, T subject); }
     private Runnable render_implementation, update_implementation;
     private Game_Object(T subject, Object_Identity<T> identity) {
         id = identity;
@@ -32,10 +32,8 @@ public class Game_Object<T> implements Renderable{
 
     @Override
     public void update() {
-       if (update_implementation != null)
-           update_implementation.run();
+        update_implementation.run();
     }
-
     @Override
     public void render() {
        if (render_implementation != null)
@@ -113,7 +111,6 @@ public class Game_Object<T> implements Renderable{
     public static final Object_Identity<Game_Character> Trail = (trail, character) -> {
 
         trail.set_color(character.get_color());
-        character.set_trail(trail);
 
         trail.update_implementation = () -> {
             trail.set_position(character.get_x(), character.get_y());
@@ -122,7 +119,8 @@ public class Game_Object<T> implements Renderable{
         trail.render_implementation = () -> {
 
             var g2D = (Graphics2D) Graphics_Handler.get_graphics();
-            for (int i = 1; i <= 29; i++) {
+            var trail_length = character.get_id() == Game_Character.Player? 15: 29;
+            for (int i = 1; i <= trail_length; i++) {
                 Graphics_Handler.get_graphics().setColor(character.get_color());
                 g2D.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float)(1.0/i  * 16 /character.get_width())));
                 Graphics_Handler.get_graphics().fillRect((int) character.get_x() - (int) (character.get_vel_x() * character.get_width()/2 * i/10), (int) character.get_y()  - (int) (character.get_vel_y() * character.get_height()/2 * i/10), character.get_width() , character.get_height());
@@ -130,5 +128,6 @@ public class Game_Object<T> implements Renderable{
             g2D.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1));
         };
     };
+
 
 }

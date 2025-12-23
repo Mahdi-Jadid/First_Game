@@ -11,7 +11,6 @@ import com.tutorial.main.system_resources.Game_Thread;
 import java.awt.event.KeyEvent;
 
 import static com.tutorial.main.graphics.renderable_objects.Game_Character.Player;
-import static com.tutorial.main.graphics.renderable_objects.Game_Character.spawn_center;
 
 public class Main {
 
@@ -24,30 +23,13 @@ public class Main {
         );
 
         Input.set_press_command(KeyEvent.VK_ESCAPE, () -> System.exit(0));
-        var player = spawn_center(Player);
+
+        var player = Game_Character.New(Player);
         var hud = Game_Object.New(player, Game_Object.Player_HUD);
 
         Graphics_Handler.add_renderables(player, hud);
 
         Level_Manager.spawn();
-        // Could be a good idea for a boss/bonus level
-//        for (int i = 0; i < 7; i++) {
-//
-//            var id = Game_Character.Enemy_Basic;
-//
-//            if (i > 4)
-//                id = Game_Character.Enemy_Fast;
-//
-//            var enemy = Game_Character.New(i*50, i*37, id);
-//
-//            Graphics_Handler.add_renderables(
-//                    enemy,
-//                     Game_Object.New(enemy, Game_Object.Trail)
-//            );
-//        }
-
-
-
 
     }
 
