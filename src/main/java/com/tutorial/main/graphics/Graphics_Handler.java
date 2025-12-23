@@ -1,12 +1,11 @@
 package com.tutorial.main.graphics;
 
 import com.tutorial.main.graphics.input.Input;
-import com.tutorial.main.graphics.renderable_objects.Level_Manager;
 import com.tutorial.main.graphics.renderable_objects.Renderable;
+import com.tutorial.main.graphics.system_managers.Level_Manager;
 import com.tutorial.main.graphics.window.Window;
 
 import java.awt.*;
-import java.awt.image.BufferStrategy;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.stream.Collectors;
@@ -17,6 +16,8 @@ public final class Graphics_Handler extends Canvas {
     private static Graphics game_graphics;
     private static Graphics_Handler handler;
     private final LinkedList<Renderable> renderables_list;
+    private final LinkedList<Renderable> pending_addition;
+    private final LinkedList<Renderable> pending_removal;
 
     public static void init(Renderable... renderables) {
         if (handler == null)
@@ -25,13 +26,22 @@ public final class Graphics_Handler extends Canvas {
     }
     private Graphics_Handler(Renderable... renderables) {
         renderables_list = Arrays.stream(renderables).collect(Collectors.toCollection(LinkedList::new));
+        pending_addition = new LinkedList<>();
+        pending_removal = new LinkedList<>();
     }
 
     public void update() {
 
-        Level_Manager.increment_score(1);
-        if (Level_Manager.get_score() == 250)
-            Level_Manager.increment_level();
+        if (!pending_addition.isEmpty()) {
+            renderables_list.addAll(pending_addition);
+            pending_addition.clear();
+        }
+        if (!pending_removal.isEmpty()) {
+            renderables_list.removeAll(pending_removal);
+            pending_removal.clear();
+        }
+
+        Level_Manager.update();
 
         if (!renderables_list.isEmpty())
             for (var renderable : renderables_list)
@@ -39,7 +49,6 @@ public final class Graphics_Handler extends Canvas {
 
     }
     public void render() {
-
         var buffer_strategy = getBufferStrategy();
 
         if (buffer_strategy == null) {
@@ -74,18 +83,15 @@ public final class Graphics_Handler extends Canvas {
     public static void add_renderables(Renderable... renderables) {
         if (handler == null) init();
         if (renderables == null) return;
-        Stream.of(renderables).forEach(get_handler().renderables_list::add);
+        Stream.of(renderables).forEach(get_handler().pending_addition::add);
     }
     public static void remove_renderable(Renderable renderable) {
         if (handler == null) init();
         if (renderable == null) return;
-
-        get_handler().renderables_list.remove(renderable);
+        get_handler().pending_removal.add(renderable);
     }
 
     public LinkedList<Renderable> get_renderables() {
         return renderables_list;
     }
-
-
 }

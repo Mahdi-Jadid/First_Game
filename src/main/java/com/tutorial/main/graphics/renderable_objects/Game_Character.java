@@ -6,6 +6,7 @@ import com.tutorial.main.graphics.window.Window;
 import com.tutorial.main.specifiers.Specifiers;
 
 import java.awt.*;
+import java.util.*;
 import java.util.List;
 
 import static java.awt.event.KeyEvent.*;
@@ -14,6 +15,7 @@ import static java.awt.event.KeyEvent.*;
 public class Game_Character implements Renderable {
 
     public static final int SAME = 900_000_000;
+    private static final Random random = new Random();
 
     // ============== BASE FIELDS ============== //
 
@@ -23,18 +25,18 @@ public class Game_Character implements Renderable {
     private float x, y;
     private float vel_x, vel_y;
     private float health;
-    private float trail_lifetime;
-
-
-
+    private Game_Object<Game_Character> trail;
 
     // ============== Identity Dependent Methods ============== //
 
     @FunctionalInterface
     private interface Character_Identity { void implement(Game_Character character); }
     private Runnable render_implementation;
-    private Runnable update_position,update_health, update_trail;
+    private Runnable update_position,update_health;
     private Rectangle bounds;
+    private static final List<Game_Character> players = new ArrayList<>();
+    private static final List<Game_Character> enemies = new ArrayList<>();
+
 
     private Game_Character(float init_x, float init_y, Character_Identity character_id) {
         x = init_x;
@@ -42,6 +44,9 @@ public class Game_Character implements Renderable {
         id = character_id;
         if (id == null) throw new RuntimeException("No Identity Specified");
         id.implement(this);
+        add_player(this);
+        add_enemy(this);
+        Game_Object.New(this, Game_Object.Trail);
         bounds = new Rectangle((int)x, (int)y, width, height);
     }
 
@@ -53,13 +58,42 @@ public class Game_Character implements Renderable {
 
     @Override
     public void update() {
-        for (var update : List.of(update_position, update_health, update_trail))
+        for (var update : List.of(update_position, update_health))
                update.run();
+
+        trail.update();
     }
     @Override
     public void render() {
         if (render_implementation != null)
            render_implementation.run();
+
+        trail.render();
+    }
+
+    public static Game_Character spawn_random(Character_Identity id) {
+        return Game_Character.New(random.nextInt(50, Window.get_width() - 50), random.nextInt(50,Window.get_height() - 50), id);
+    }
+
+    public static Game_Character spawn_center(Character_Identity id) {
+        var character = Game_Character.New(0, 0, id);
+        character.set_position(
+                Window.get_width()/2 - character.get_width(),
+                Window.get_height()/2 - character.get_height()
+        );
+        return character;
+    }
+
+    public static void add_player(Game_Character player) {
+        if (player.get_id() != Player) return;
+
+        players.add(player);
+    }
+
+    public static void add_enemy(Game_Character enemy) {
+        if (enemy.get_id() == Player) return;
+
+        enemies.add(enemy);
     }
 
 
@@ -87,6 +121,9 @@ public class Game_Character implements Renderable {
     public float get_y() {
         return y;
     }
+
+    public float get_vel_x() { return vel_x; }
+    public float get_vel_y() { return vel_y; }
 
     private void set_dimensions(int width, int height) {
         this.width = width;
@@ -118,19 +155,26 @@ public class Game_Character implements Renderable {
         return bounds;
     }
 
+    public void set_trail(Game_Object<Game_Character> trail) {
+        if (trail.get_id() == Game_Object.Trail)
+            this.trail = trail;
+    }
+    public Game_Object<Game_Character> get_trail() {
+        return trail;
+    }
+    public static List<Game_Character> get_players() { return players; }
+    public static List<Game_Character> get_enemies() { return enemies; }
+
 
     // Identity Implementations
+
+    // ================ Player ================= //
 
     public static final Character_Identity Player =  (player) -> {
 
         player.set_dimensions(32, 32);
         player.set_color(Color.white);
         player.set_health(100);
-
-        player.set_position(
-                Window.get_width()/2 - player.get_width(),
-                Window.get_height()/2 - player.get_height()
-        );
 
         final float player_health_initial = player.get_health();
 
@@ -157,6 +201,7 @@ public class Game_Character implements Renderable {
         Input.set_release_command(VK_S, () -> key_down[2] = false);
         Input.set_release_command(VK_D, () -> key_down[3] = false);
 
+        //var player_trail = Game_Object.New(player, Game_Object.Trail);
 
         player.update_position = () -> {
 
@@ -173,11 +218,8 @@ public class Game_Character implements Renderable {
             );
 
             player.bounds.setLocation((int)x, (int)y);
-
         };
         player.update_health = () -> {
-
-            var renderables = Graphics_Handler.get_handler().get_renderables();
 
             player.set_health(
                     (float) Specifiers.clamp(
@@ -187,19 +229,11 @@ public class Game_Character implements Renderable {
                    )
             );
 
-            var characters = renderables.stream()
-                    .filter(Game_Character.class::isInstance)
-                    .map(Game_Character.class::cast).toList();
-
-            for (var character : characters) {
-                if (character.get_id() == Game_Character.Enemy_Basic || character.get_id() == Game_Character.Enemy_Fast)
+            for (var character : enemies) {
+                if (character.get_id() == Game_Character.Enemy_Basic || character.get_id() == Game_Character.Enemy_Fast || character.get_id() == Game_Character.Enemy_Smart)
                     if (player.get_bounds().intersects(character.get_bounds()))
                         player.set_health(player.get_health() - 2);
             }
-
-        };
-
-        player.update_trail = () -> {
 
         };
 
@@ -210,6 +244,8 @@ public class Game_Character implements Renderable {
         };
 
     };
+
+    // ================ Enemies ================ //
 
     public static final Character_Identity Enemy_Basic = (enemy_basic) -> {
 
@@ -242,7 +278,6 @@ public class Game_Character implements Renderable {
             enemy_basic.bounds.setLocation((int)enemy_basic.get_x(), (int)enemy_basic.get_y());
         };
         enemy_basic.update_health = () -> {};
-        enemy_basic.update_trail = () -> {};
 
         enemy_basic.render_implementation = () -> {
             var graphics = Graphics_Handler.get_graphics();
@@ -282,7 +317,6 @@ public class Game_Character implements Renderable {
             enemy_fast.bounds.setLocation((int) enemy_fast.get_x(), (int) enemy_fast.get_y());
         };
         enemy_fast.update_health = () -> {};
-        enemy_fast.update_trail = () -> {};
 
         enemy_fast.render_implementation = () -> {
             var graphics = Graphics_Handler.get_graphics();
@@ -291,12 +325,79 @@ public class Game_Character implements Renderable {
         };
 
     };
+    public static final Character_Identity Enemy_Smart = (enemy_smart) -> {
+
+        enemy_smart.set_dimensions(16, 16);
+        enemy_smart.set_color(Color.green);
+        Map<Game_Character, List<Float>> closeness = new HashMap<>();
+        float[] closest = new float[1];
+        List<Game_Character> target = new ArrayList<>();
+        closest[0] = 1000;
+
+        enemy_smart.update_position = () -> {
+
+            for (var player : players) {
+                var diff_x = player.get_x() - enemy_smart.get_x();
+                var diff_y = player.get_y() - enemy_smart.get_y();
+                var distance = (float)(Math.sqrt(Math.pow(diff_x, 2) + Math.pow(diff_y, 2)));
+                closeness.put(
+                        player,
+                        List.of(
+                                diff_x,
+                                diff_y,
+                                distance
+                        )
+                );
+            }
+
+            for (var player : players) {
+                if (closest[0] > closeness.get(player).get(2)) {
+                    closest[0] = closeness.get(player).get(2);
+                    target.add(player);
+                }
+            }
+
+            var diff_x = closeness.get(target.getFirst()).getFirst();
+            var diff_y = closeness.get(target.getFirst()).get(1);
+            var distance = closeness.get(target.getFirst()).getLast();
 
 
+            if (diff_x != 0 && diff_y != 0)
+                enemy_smart.set_velocity(
+                    3 * diff_x / distance,
+                     3 * diff_y / distance
+                );
 
+            enemy_smart.set_position(
+                    enemy_smart.get_x() + enemy_smart.vel_x,
+                    enemy_smart.get_y() + enemy_smart.vel_y
+            );
+            if (enemy_smart.x > Window.get_width() - enemy_smart.width){
+                enemy_smart.x = Window.get_width() - enemy_smart.width;
+                enemy_smart.vel_x *= -1;
+            }
+            else if (enemy_smart.x < 0) {
+                enemy_smart.x = 0;
+                enemy_smart.vel_x *= -1;
+            }
 
+            if (enemy_smart.y > Window.get_height() - enemy_smart.height) {
+                enemy_smart.y = Window.get_height() - enemy_smart.height;
+                enemy_smart.vel_y *= -1;
+            }
+            else if (enemy_smart.y < 0) {
+                enemy_smart.vel_y *= -1;
+            }
 
+            enemy_smart.bounds.setLocation((int)enemy_smart.get_x(), (int)enemy_smart.get_y());
+        };
+        enemy_smart.update_health = () -> {};
 
-
+        enemy_smart.render_implementation = () -> {
+            var graphics = Graphics_Handler.get_graphics();
+            graphics.setColor(enemy_smart.get_color());
+            graphics.fillRect((int) enemy_smart.get_x(), (int) enemy_smart.get_y(), enemy_smart.get_width(), enemy_smart.get_height());
+        };
+    };
 
 }

@@ -26,7 +26,6 @@ public final class Game_Thread {
             throw new RuntimeException(e);
         }
     }
-
     public static boolean is_running() { return running; }
 
 }

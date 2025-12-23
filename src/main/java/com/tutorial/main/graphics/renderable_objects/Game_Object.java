@@ -1,11 +1,9 @@
 package com.tutorial.main.graphics.renderable_objects;
 
 import com.tutorial.main.graphics.Graphics_Handler;
-import com.tutorial.main.graphics.window.Window;
-import com.tutorial.main.specifiers.Specifiers;
+import com.tutorial.main.graphics.system_managers.Level_Manager;
 
 import java.awt.*;
-import java.util.Random;
 
 public class Game_Object<T> implements Renderable{
 
@@ -14,12 +12,12 @@ public class Game_Object<T> implements Renderable{
     private int width, height;
     private float x, y;
     private Color color;
-    private Object_Identity<T> id;
+    private final Object_Identity<T> id;
 
     // ============== Identity Dependent Methods ============== //
 
     @FunctionalInterface
-    private interface Object_Identity<T> { void implement(Game_Object object, T subject);}
+    private interface Object_Identity<T> { void implement(Game_Object<T> object, T subject);}
     private Runnable render_implementation, update_implementation;
     private Game_Object(T subject, Object_Identity<T> identity) {
         id = identity;
@@ -85,12 +83,14 @@ public class Game_Object<T> implements Renderable{
         final float player_health_initial = player.get_health();
 
         hud.update_implementation = () -> {
-
             var current_health = player.get_health();
             if (current_health == 0) {
+                Graphics_Handler.remove_renderable(player.get_trail());
+                Game_Character.get_players().remove(player);
                 Graphics_Handler.remove_renderable(player);
                 Graphics_Handler.remove_renderable(hud);
             }
+
         };
 
         hud.render_implementation = () -> {
@@ -105,11 +105,30 @@ public class Game_Object<T> implements Renderable{
             graphics.fillRect((int) hud.get_x(), (int) hud.get_y(), (int) (current_health/ player_health_initial * hud.width), hud.get_height());
             graphics.setColor(Color.WHITE);
             graphics.drawRect((int) hud.get_x(), (int) hud.get_y(), hud.get_width(), hud.get_height());
+            graphics.drawString("Level : " + Level_Manager.get_level(), (int) hud.get_x(), (int) hud.get_y() + 50);
+            graphics.drawString("Score : " + Level_Manager.get_score(), (int) hud.get_x(), (int) hud.get_y() + 64);
 
-            graphics.drawString("Level : " + Level_Manager.get_level(), (int) hud.get_x(), (int) hud.get_y() + 64);
-            graphics.drawString("Score : " + Level_Manager.get_score(), (int) hud.get_x(), (int) hud.get_y() + 80);
         };
     };
+    public static final Object_Identity<Game_Character> Trail = (trail, character) -> {
 
+        trail.set_color(character.get_color());
+        character.set_trail(trail);
+
+        trail.update_implementation = () -> {
+            trail.set_position(character.get_x(), character.get_y());
+        };
+
+        trail.render_implementation = () -> {
+
+            var g2D = (Graphics2D) Graphics_Handler.get_graphics();
+            for (int i = 1; i <= 29; i++) {
+                Graphics_Handler.get_graphics().setColor(character.get_color());
+                g2D.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float)(1.0/i  * 16 /character.get_width())));
+                Graphics_Handler.get_graphics().fillRect((int) character.get_x() - (int) (character.get_vel_x() * character.get_width()/2 * i/10), (int) character.get_y()  - (int) (character.get_vel_y() * character.get_height()/2 * i/10), character.get_width() , character.get_height());
+            }
+            g2D.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1));
+        };
+    };
 
 }
