@@ -5,6 +5,7 @@ import com.tutorial.main.graphics.input.Input;
 import com.tutorial.main.graphics.renderable_objects.Game_Character;
 import com.tutorial.main.graphics.renderable_objects.Game_Object;
 import com.tutorial.main.graphics.system_managers.Level_Manager;
+import com.tutorial.main.graphics.system_managers.State_Manager;
 import com.tutorial.main.graphics.window.Window;
 import com.tutorial.main.system_resources.Game_Thread;
 
@@ -23,6 +24,7 @@ public class Main {
         );
 
         Input.set_press_command(KeyEvent.VK_ESCAPE, () -> System.exit(0));
+        Input.set_press_command(KeyEvent.VK_ENTER, State_Manager::begin_game);
 
         var player = Game_Character.New(Player);
         var hud = Game_Object.New(player, Game_Object.Player_HUD);
