@@ -2,20 +2,18 @@ package com.tutorial.main;
 
 import com.tutorial.main.graphics.Graphics_Handler;
 import com.tutorial.main.graphics.input.Input;
-import com.tutorial.main.graphics.renderable_objects.Game_Character;
-import com.tutorial.main.graphics.renderable_objects.Game_Object;
-import com.tutorial.main.graphics.system_managers.Level_Manager;
 import com.tutorial.main.graphics.system_managers.State_Manager;
 import com.tutorial.main.graphics.window.Window;
 import com.tutorial.main.system_resources.Game_Thread;
 
 import java.awt.event.KeyEvent;
 
-import static com.tutorial.main.graphics.renderable_objects.Game_Character.Player;
-
 public class Main {
 
     private void init() {
+
+        State_Manager.init();
+
         Window.init(
                 Graphics_Handler.get_handler(),
                 Window.EXIT_ON_CLOSE,
@@ -24,15 +22,6 @@ public class Main {
         );
 
         Input.set_press_command(KeyEvent.VK_ESCAPE, () -> System.exit(0));
-        Input.set_press_command(KeyEvent.VK_ENTER, State_Manager::begin_game);
-
-        var player = Game_Character.New(Player);
-        var hud = Game_Object.New(player, Game_Object.Player_HUD);
-
-        Graphics_Handler.add_renderables(player, hud);
-
-        Level_Manager.spawn();
-
     }
 
     private void start_loop() {

@@ -3,12 +3,14 @@ package com.tutorial.main.graphics.renderable_objects;
 import com.tutorial.main.graphics.Graphics_Handler;
 import com.tutorial.main.graphics.input.Input;
 import com.tutorial.main.graphics.system_managers.Level_Manager;
+import com.tutorial.main.graphics.system_managers.State_Manager;
 import com.tutorial.main.graphics.window.Window;
 import com.tutorial.main.specifiers.Specifiers;
 
 import java.awt.*;
-import java.util.*;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import static java.awt.event.KeyEvent.*;
 
@@ -153,6 +155,13 @@ public class Game_Character implements Renderable {
 
             public static List<Game_Character> get_players() { return players; }
             public static List<Game_Character> get_enemies() { return enemies_onscreen; }
+
+            public static void reset_player_stats(Game_Character player) {
+                if (player.get_id() != Player) return;
+
+                player.set_health(100);
+                player.set_position((Window.get_width() - player.get_width())/2.0f, (Window.get_height() - player.get_height()) / 2.0f);
+            }
 
     // Identity Implementations
 
@@ -323,7 +332,7 @@ public class Game_Character implements Renderable {
             for (var player : players)
                 if (coin.get_bounds().intersects(player.get_bounds())) {
                     Level_Manager.increment_score(500);
-                    Graphics_Handler.remove_renderable(coin);
+                    State_Manager.remove_renderable(coin);
                 }
         };
     };

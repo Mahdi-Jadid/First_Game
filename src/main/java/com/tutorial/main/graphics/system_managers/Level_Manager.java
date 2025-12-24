@@ -1,6 +1,5 @@
 package com.tutorial.main.graphics.system_managers;
 
-import com.tutorial.main.graphics.Graphics_Handler;
 import com.tutorial.main.graphics.renderable_objects.Game_Character;
 
 import java.util.HashMap;
@@ -18,7 +17,7 @@ public class Level_Manager {
     private static int level_score_requirement = 1000;
 
     static {
-        level = 1;
+        level = 0;
         score_per_level = 0;
         spawn_plan.put(1, List.of(New(Enemy_Basic), New(Coin)));
         spawn_plan.put(2,List.of(New(Enemy_Basic), New(Enemy_Basic), New(Coin)));
@@ -36,23 +35,38 @@ public class Level_Manager {
         spawn();
     }
     public static void spawn() {
+
         if (spawn_plan.get(level) != null)
             if (!spawn_plan.get(level).isEmpty())
              for (var enemy : spawn_plan.get(level)) {
                  if (enemy.get_id() != Coin) // Patch code
                   Game_Character.add_enemy(enemy);
-                 Graphics_Handler.add_renderables(enemy);
+                 State_Manager.add_renderables(enemy);
              }
 
     }
 
     public static void update() {
         score_per_level++;
-        if (score_per_level >= level_score_requirement)
-         increment_level();
+        if (score_per_level >= level_score_requirement || level == 0) {
+            increment_level();
+        }
     }
 
     public static int get_level() { return level; }
     public static int get_score() { return score_per_level; }
+
+    public static void reset() {
+        level = 0;
+        level_score_requirement = 500;
+        score_per_level = 0;
+        total_score = 0;
+        spawn_plan.clear();
+        spawn_plan.put(1, List.of(New(Enemy_Basic), New(Coin)));
+        spawn_plan.put(2,List.of(New(Enemy_Basic), New(Enemy_Basic), New(Coin)));
+        spawn_plan.put(3, List.of(New(Enemy_Fast), New(Coin)));
+        spawn_plan.put(4, List.of(New(Enemy_Fast), New(Enemy_Basic), New(Coin), New(Coin)));
+        spawn_plan.put(5, List.of(New(Enemy_Smart), New(Coin)));
+    }
 
 }

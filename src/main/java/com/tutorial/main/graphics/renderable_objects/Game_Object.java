@@ -2,6 +2,7 @@ package com.tutorial.main.graphics.renderable_objects;
 
 import com.tutorial.main.graphics.Graphics_Handler;
 import com.tutorial.main.graphics.system_managers.Level_Manager;
+import com.tutorial.main.graphics.system_managers.State_Manager;
 
 import java.awt.*;
 
@@ -83,10 +84,10 @@ public class Game_Object<T> implements Renderable{
         hud.update_implementation = () -> {
             var current_health = player.get_health();
             if (current_health == 0) {
-                Graphics_Handler.remove_renderable(player.get_trail());
+                State_Manager.remove_renderable(player.get_trail());
                 Game_Character.get_players().remove(player);
-                Graphics_Handler.remove_renderable(player);
-                Graphics_Handler.remove_renderable(hud);
+                State_Manager.remove_renderable(player);
+                State_Manager.remove_renderable(hud);
             }
 
         };
