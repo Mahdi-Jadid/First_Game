@@ -7,7 +7,11 @@ import com.tutorial.main.graphics.system_managers.State_Manager;
 import com.tutorial.main.graphics.window.Window;
 import com.tutorial.main.specifiers.Specifiers;
 
+import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -90,13 +94,16 @@ public class Game_Character implements Renderable {
     }
     @Override
     public void render() {
-        if (render_implementation != null)
-           render_implementation.run();
 
         Graphics_Handler.get_graphics().setColor(color);
         Graphics_Handler.get_graphics().fillRect((int) x, (int) y, width, height);
+
         if (trail != null)
             trail.render();
+
+        if (render_implementation != null)
+           render_implementation.run();
+
     }
 
 
@@ -171,7 +178,7 @@ public class Game_Character implements Renderable {
 
         // Player Appearance
             player.set_dimensions(32, 32);
-            player.set_color(Color.white);
+            player.set_color(new Color(163, 207, 26));
             player.set_health(100);
             var player_health_initial = player.get_health();
             add_player(player);
@@ -243,6 +250,18 @@ public class Game_Character implements Renderable {
                     for (var character : enemies_onscreen)
                         if (player.get_bounds().intersects(character.get_bounds()))
                             player.set_health(player.get_health() - 2);
+            };
+
+            player.render_implementation = () -> {
+                BufferedImage creeperImg;
+
+                try {
+                    creeperImg = ImageIO.read(new File("src/resources/creeper_player.png"));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+
+                Graphics_Handler.get_graphics().drawImage(creeperImg, (int) player.get_x(), (int) player.get_y(), null, null);
             };
 
     };

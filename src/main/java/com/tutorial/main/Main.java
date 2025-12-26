@@ -12,8 +12,6 @@ public class Main {
 
     private void init() {
 
-        State_Manager.init();
-
         Window.init(
                 Graphics_Handler.get_handler(),
                 Window.EXIT_ON_CLOSE,

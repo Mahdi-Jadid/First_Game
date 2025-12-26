@@ -12,10 +12,11 @@ public class Input {
 
     private static final List<Integer> press_command_keys = new ArrayList<>();
     private static final List<Integer> release_command_keys = new ArrayList<>();
-    private static final List<Runnable> mouse_release_conditions = new ArrayList<>();
+    private static final List<List<Integer>> mouse_click_conditions = new ArrayList<>();
 
     private static final Map<Integer, Runnable> press_commands = new HashMap<>();
     private static final Map<Integer, Runnable> release_commands = new HashMap<>();
+    private static final Map<List<Integer>, Runnable> mouse_click_commands = new HashMap<>();
 
     private Input() {}
 
@@ -39,9 +40,16 @@ public class Input {
       };
       var mouse_adapter = new MouseAdapter() {
           @Override
-          public void mousePressed(MouseEvent e) {
-              for (var condition : mouse_release_conditions)
-                  condition.run();
+          public void mouseClicked(MouseEvent e) {
+
+
+              for (var list : mouse_click_conditions) {
+                  int x = e.getX();
+                  int y = e.getY();
+                  if (list.getFirst() <= x && list.get(1) >= x)
+                      if (list.get(2) <= y && list.getLast() >= y)
+                          mouse_click_commands.get(list).run();
+              }
           }
       };
 
@@ -63,11 +71,15 @@ public class Input {
         }
     }
 
-    public static void set_on_mouse_pressed(boolean condition, Runnable run) {
-        mouse_release_conditions.add(() -> {
-            if (condition)
-                run.run();
-        });
+    public static void set_on_mouse_clicked(int lower_x, int upper_x, int lower_y, int upper_y, Runnable run) {
+
+        var list = List.of(lower_x, upper_x, lower_y, upper_x);
+        mouse_click_conditions.add(list);
+        mouse_click_commands.put(list, run);
     }
 
+    public static void clear_mouse_click_commands() {
+        mouse_click_conditions.clear();
+        mouse_click_commands.clear();
+    }
 }

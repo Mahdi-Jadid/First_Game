@@ -113,18 +113,17 @@ public class Game_Object<T> implements Renderable{
 
         trail.set_color(character.get_color());
 
-        trail.update_implementation = () -> {
-            trail.set_position(character.get_x(), character.get_y());
-        };
+        trail.update_implementation = () ->  trail.set_position(character.get_x(), character.get_y());
+
 
         trail.render_implementation = () -> {
 
             var g2D = (Graphics2D) Graphics_Handler.get_graphics();
-            var trail_length = character.get_id() == Game_Character.Player? 15: 29;
+            var trail_length = character.get_id() == Game_Character.Player? 30: 500;
             for (int i = 1; i <= trail_length; i++) {
                 Graphics_Handler.get_graphics().setColor(character.get_color());
                 g2D.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float)(1.0/i  * 16 /character.get_width())));
-                Graphics_Handler.get_graphics().fillRect((int) character.get_x() - (int) (character.get_vel_x() * character.get_width()/2 * i/10), (int) character.get_y()  - (int) (character.get_vel_y() * character.get_height()/2 * i/10), character.get_width() , character.get_height());
+                Graphics_Handler.get_graphics().fillRect((int) character.get_x() - (int) (character.get_vel_x() * character.get_width()/2 * i/30), (int) character.get_y()  - (int) (character.get_vel_y() * character.get_height()/2 * i/30), character.get_width() , character.get_height());
             }
             g2D.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1));
         };
