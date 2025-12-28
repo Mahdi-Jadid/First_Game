@@ -1,29 +1,26 @@
 package com.tutorial.main;
 
-import com.tutorial.main.graphics.Graphics_Handler;
-import com.tutorial.main.graphics.input.Input;
-import com.tutorial.main.graphics.system_managers.State_Manager;
+import com.tutorial.main.graphics.GraphicsHandler;
 import com.tutorial.main.graphics.window.Window;
 import com.tutorial.main.system_resources.Game_Thread;
-
-import java.awt.event.KeyEvent;
 
 public class Main {
 
     private void init() {
 
+        // To-do: Make Entire API compatible for vulkan integration....
+        GraphicsHandler.init();
         Window.init(
-                Graphics_Handler.get_handler(),
+                GraphicsHandler.get_handler(),
                 Window.EXIT_ON_CLOSE,
                 Window.LOCATION_CENTER,
                 Window.VISIBLE
         );
-
-        Input.set_press_command(KeyEvent.VK_ESCAPE, () -> System.exit(0));
     }
 
     private void start_loop() {
-        var handler = Graphics_Handler.get_handler();
+
+        var handler = GraphicsHandler.get_handler();
         handler.requestFocus();
 
         Game_Thread.start(
@@ -60,7 +57,6 @@ public class Main {
                 }
 
                 Game_Thread.stop();
-
             }
         );
     }

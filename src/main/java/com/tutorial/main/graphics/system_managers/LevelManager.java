@@ -1,6 +1,7 @@
 package com.tutorial.main.graphics.system_managers;
 
 import com.tutorial.main.graphics.renderable_objects.Game_Character;
+import com.tutorial.main.graphics.renderable_objects.Game_Object;
 
 import java.util.HashMap;
 import java.util.List;
@@ -8,13 +9,15 @@ import java.util.Map;
 
 import static com.tutorial.main.graphics.renderable_objects.Game_Character.*;
 
-public class Level_Manager {
+public class LevelManager {
 
-    private Level_Manager() {}
+    private LevelManager() {}
+
+    private static boolean added_player = false;
 
     private static final Map<Integer, List<Game_Character>> spawn_plan = new HashMap<>();
     private static int level, score_per_level, total_score;
-    private static int level_score_requirement = 1000;
+    private static int level_score_requirement = 0;
 
     static {
         level = 0;
@@ -24,6 +27,7 @@ public class Level_Manager {
         spawn_plan.put(3, List.of(New(Enemy_Fast), New(Coin)));
         spawn_plan.put(4, List.of(New(Enemy_Fast), New(Enemy_Basic), New(Coin), New(Coin)));
         spawn_plan.put(5, List.of(New(Enemy_Smart), New(Coin)));
+        spawn_plan.put(6, List.of(New(Enemy_Boss_1)));
     }
 
     public static void increment_score(int by) { score_per_level += by; }
@@ -31,18 +35,30 @@ public class Level_Manager {
         total_score += score_per_level;
         score_per_level = 0;
         level++;
-        level_score_requirement += 500;
+        level_score_requirement += 100;
         spawn();
     }
     public static void spawn() {
+        if (!added_player) {
+            var player = New(Player);
+            var hud = Game_Object.New(player, Game_Object.Player_HUD);
+            StateManager.add_renderables(player, hud);
+            added_player = true;
+        }
 
         if (spawn_plan.get(level) != null)
-            if (!spawn_plan.get(level).isEmpty())
+            if (!spawn_plan.get(level).isEmpty()) {
+                if (level == 6) {
+                    StateManager.get_renderables().removeAll(get_enemies());
+                    get_enemies().clear();
+                }
              for (var enemy : spawn_plan.get(level)) {
+
                  if (enemy.get_id() != Coin) // Patch code
                   Game_Character.add_enemy(enemy);
-                 State_Manager.add_renderables(enemy);
+                 StateManager.add_renderables(enemy);
              }
+            }
 
     }
 
@@ -61,12 +77,14 @@ public class Level_Manager {
         level_score_requirement = 500;
         score_per_level = 0;
         total_score = 0;
+        added_player = false;
         spawn_plan.clear();
         spawn_plan.put(1, List.of(New(Enemy_Basic), New(Coin)));
         spawn_plan.put(2,List.of(New(Enemy_Basic), New(Enemy_Basic), New(Coin)));
         spawn_plan.put(3, List.of(New(Enemy_Fast), New(Coin)));
         spawn_plan.put(4, List.of(New(Enemy_Fast), New(Enemy_Basic), New(Coin), New(Coin)));
         spawn_plan.put(5, List.of(New(Enemy_Smart), New(Coin)));
+        spawn_plan.put(6, List.of(New(Enemy_Boss_1)));
     }
 
 }

@@ -1,9 +1,9 @@
 package com.tutorial.main.graphics.renderable_objects;
 
-import com.tutorial.main.graphics.Graphics_Handler;
+import com.tutorial.main.graphics.GraphicsHandler;
 import com.tutorial.main.graphics.input.Input;
-import com.tutorial.main.graphics.system_managers.Level_Manager;
-import com.tutorial.main.graphics.system_managers.State_Manager;
+import com.tutorial.main.graphics.system_managers.LevelManager;
+import com.tutorial.main.graphics.system_managers.StateManager;
 import com.tutorial.main.graphics.window.Window;
 import com.tutorial.main.specifiers.Specifiers;
 
@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Random;
 
 import static java.awt.event.KeyEvent.*;
-
 
 public class Game_Character implements Renderable {
 
@@ -46,7 +45,7 @@ public class Game_Character implements Renderable {
 
     @FunctionalInterface
     private interface Character_Identity { void implement(Game_Character character); }
-    private Runnable render_implementation; // Experimental, otherwise deprecated for removal
+    private Runnable render_implementation;
     private Runnable update_implementation;
     private final Rectangle bounds;
     private static final List<Game_Character> players = new ArrayList<>();
@@ -95,8 +94,8 @@ public class Game_Character implements Renderable {
     @Override
     public void render() {
 
-        Graphics_Handler.get_graphics().setColor(color);
-        Graphics_Handler.get_graphics().fillRect((int) x, (int) y, width, height);
+        GraphicsHandler.get_graphics().setColor(color);
+        GraphicsHandler.get_graphics().fillRect((int) x, (int) y, width, height);
 
         if (trail != null)
             trail.render();
@@ -132,13 +131,12 @@ public class Game_Character implements Renderable {
             private void set_health(float health) { this.health = health; }
 
             public static void add_player(Game_Character player) {
-                if (player.get_id() != Player) return;
-
-                players.add(player);
+                if (player.get_id() == Player)
+                    players.add(player);
             }
             public static void add_enemy(Game_Character enemy) {
-                if (enemy.get_id() == Player) return;
-                enemies_onscreen.add(enemy);
+                if (enemy.get_id() != Player)
+                   enemies_onscreen.add(enemy);
             }
 
         // Getters
@@ -163,13 +161,6 @@ public class Game_Character implements Renderable {
             public static List<Game_Character> get_players() { return players; }
             public static List<Game_Character> get_enemies() { return enemies_onscreen; }
 
-            public static void reset_player_stats(Game_Character player) {
-                if (player.get_id() != Player) return;
-
-                player.set_health(100);
-                player.set_position((Window.get_width() - player.get_width())/2.0f, (Window.get_height() - player.get_height()) / 2.0f);
-            }
-
     // Identity Implementations
 
     // ================ Player ================= //
@@ -177,6 +168,7 @@ public class Game_Character implements Renderable {
     public static final Character_Identity Player =  (player) -> {
 
         // Player Appearance
+
             player.set_dimensions(32, 32);
             player.set_color(new Color(163, 207, 26));
             player.set_health(100);
@@ -190,6 +182,7 @@ public class Game_Character implements Renderable {
                 );
 
         // Player Controls
+            Input.remove_player_controls();
             final boolean[] key_down = new boolean[4];
             Input.set_press_command(VK_W, () -> {
                 player.set_velocity(SAME, -5);
@@ -261,7 +254,7 @@ public class Game_Character implements Renderable {
                     throw new RuntimeException(e);
                 }
 
-                Graphics_Handler.get_graphics().drawImage(creeperImg, (int) player.get_x(), (int) player.get_y(), null, null);
+                GraphicsHandler.get_graphics().drawImage(creeperImg, (int) player.get_x(), (int) player.get_y(), null, null);
             };
 
     };
@@ -339,6 +332,55 @@ public class Game_Character implements Renderable {
         };
     };
 
+    // ================ Boss Enemies ============== //
+
+    public static final Character_Identity Enemy_Boss_1 = (enemy_boss) -> {
+        // Appearance
+        enemy_boss.set_dimensions(125, 125);
+        enemy_boss.set_color(Color.red);
+        enemy_boss.set_position((int) Specifiers.centre(enemy_boss.width, Window.get_width()), -125);
+        enemy_boss.set_velocity(0, 0.5f);
+
+        List<Game_Character> bullets = new ArrayList<>();
+
+        long[] count = new long[1];
+        count[0] = 0;
+
+        enemy_boss.update_implementation = () -> {
+
+            enemy_boss.set_position(enemy_boss.x + enemy_boss.vel_x, enemy_boss.y + enemy_boss.vel_y);
+
+            enemy_boss.y = (float) Specifiers.clamp(enemy_boss.y, -125, 25);
+            if (enemy_boss.y == 25) enemy_boss.set_velocity(0,0);
+
+
+           if (count[0] == 100) {
+
+               var bullet = New(enemy_boss.x + enemy_boss.width / 2,
+                       enemy_boss.y + enemy_boss.height / 2,
+                       Enemy_Basic);
+
+
+                bullet.set_velocity((random.nextBoolean()? 5: -5), 5);
+
+               bullet.set_position(
+                       enemy_boss.x + enemy_boss.width / 2 - bullet.width / 2,
+                       enemy_boss.y + enemy_boss.height / 2 - bullet.height / 2
+               );
+
+               bullets.add(bullet);
+               get_enemies().add(bullet);
+               StateManager.add_renderables(bullet);
+               count[0] = 0;
+           }
+            if(count[0] % 200 > 0 && count[0] > 200)
+                StateManager.remove_renderable(bullets.getFirst());
+
+            count[0] ++;
+        };
+
+    };
+
     // ================ Utilities ================ //
 
     public static final Character_Identity Coin = (coin) -> {
@@ -350,8 +392,8 @@ public class Game_Character implements Renderable {
         coin.update_implementation = () -> {
             for (var player : players)
                 if (coin.get_bounds().intersects(player.get_bounds())) {
-                    Level_Manager.increment_score(500);
-                    State_Manager.remove_renderable(coin);
+                    LevelManager.increment_score(500);
+                    StateManager.remove_renderable(coin);
                 }
         };
     };

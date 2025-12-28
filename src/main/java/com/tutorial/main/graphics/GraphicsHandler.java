@@ -1,25 +1,25 @@
 package com.tutorial.main.graphics;
 
 import com.tutorial.main.graphics.input.Input;
-import com.tutorial.main.graphics.system_managers.State_Manager;
+import com.tutorial.main.graphics.system_managers.StateManager;
 
 import java.awt.*;
 
-public final class Graphics_Handler extends Canvas {
+public final class GraphicsHandler extends Canvas {
 
     private static Graphics game_graphics;
-    private static Graphics_Handler handler;
+    private static GraphicsHandler handler;
 
     public static void init() {
         if (handler == null) {
-            handler = new Graphics_Handler();
+            handler = new GraphicsHandler();
             Input.add_key_listener();
         }
     }
 
-    private Graphics_Handler() {}
+    private GraphicsHandler() {}
 
-    public void update() { State_Manager.update(); }
+    public void update() { StateManager.update(); }
 
     public void render() {
         var buffer_strategy = getBufferStrategy();
@@ -30,22 +30,13 @@ public final class Graphics_Handler extends Canvas {
         }
         game_graphics = buffer_strategy.getDrawGraphics();
 
-        State_Manager.render();
+        StateManager.render();
 
         game_graphics.dispose();
         buffer_strategy.show();
-
     }
 
-    public static Graphics_Handler get_handler() {
-        if (handler == null)
-            init();
-
-        return handler;
-    }
+    public static GraphicsHandler get_handler() { return handler; }
     public static Graphics get_graphics() { return game_graphics; }
-
-
-
 
 }

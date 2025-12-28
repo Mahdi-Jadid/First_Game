@@ -1,6 +1,6 @@
 package com.tutorial.main.graphics.window;
 
-import com.tutorial.main.graphics.Graphics_Handler;
+import com.tutorial.main.graphics.GraphicsHandler;
 
 import javax.swing.*;
 
@@ -29,7 +29,7 @@ public class Window {
     public static final Window_Configuration VISIBLE =
             () -> base_frame.setVisible(true);
 
-    private Window(int width, int height, String title, Graphics_Handler handler) {
+    private Window(int width, int height, String title, GraphicsHandler handler) {
         var frame = new JFrame(title);
         frame.setSize(width, height);
         frame.setResizable(false);
@@ -39,7 +39,7 @@ public class Window {
     }
 
 
-   public static void init (Graphics_Handler handler, Window_Configuration... window_settings)  {
+   public static void init (GraphicsHandler handler, Window_Configuration... window_settings)  {
         if (window != null) return;
 
         window = new Window(WIDTH, HEIGHT, TITLE, handler);
@@ -47,7 +47,7 @@ public class Window {
                 setting.configure();
     }
 
-    public static void init (int width, int height, Graphics_Handler handler, Window_Configuration... window_settings) {
+    public static void init (int width, int height, GraphicsHandler handler, Window_Configuration... window_settings) {
         if (window == null) {
             CUSTOM_WIDTH = width;
             CUSTOM_HEIGHT = height;
@@ -57,7 +57,7 @@ public class Window {
         }
     }
 
-    public static void init (int width, int height, String title, Graphics_Handler handler, Window_Configuration... window_settings) {
+    public static void init (int width, int height, String title, GraphicsHandler handler, Window_Configuration... window_settings) {
         if (window == null) {
             CUSTOM_WIDTH = width;
             CUSTOM_HEIGHT = height;
@@ -68,7 +68,7 @@ public class Window {
         }
     }
 
-    public static void init (String title, Graphics_Handler handler, Window_Configuration... window_settings) {
+    public static void init (String title, GraphicsHandler handler, Window_Configuration... window_settings) {
         if (window == null) {
             CUSTOM_TITLE = title;
             window = new Window(WIDTH, HEIGHT, CUSTOM_TITLE, handler);
